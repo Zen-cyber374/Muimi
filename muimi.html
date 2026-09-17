@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>無意味 — 心理ミステリー</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --text: #e8e8e6;
+  --text-sub: #888884;
+  --text-muted: #555552;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --accent-detective: #378ADD;
+  --accent-detective-bg: rgba(55,138,221,0.1);
+  --accent-criminal: #E24B4A;
+  --accent-criminal-bg: rgba(226,75,74,0.1);
+  --accent-correct: #1D9E75;
+  --radius: 8px;
+  --font: 'Hiragino Mincho ProN', 'Yu Mincho', 'Georgia', serif;
+  --font-sans: 'Hiragino Sans', 'Meiryo', sans-serif;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+.wrap { width: 100%; max-width: 600px; }
+.title-screen { text-align: center; padding: 4rem 0; }
+.game-title { font-size: clamp(52px, 12vw, 80px); font-weight: 400; letter-spacing: 0.2em; color: var(--text); margin-bottom: 12px; }
+.game-sub { font-size: 13px; color: var(--text-muted); letter-spacing: 0.1em; font-family: var(--font-sans); margin-bottom: 3rem; }
+.start-btn { font-size: 13px; font-family: var(--font-sans); padding: 10px 32px; cursor: pointer; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: transparent; color: var(--text); letter-spacing: 0.05em; transition: border-color 0.2s, background 0.2s; }
+.start-btn:hover { border-color: var(--text); background: rgba(255,255,255,0.04); }
+.score-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; font-family: var(--font-sans); }
+.score-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface); border: 0.5px solid var(--border); color: var(--text-sub); }
+.score-pill span { color: var(--text); font-weight: 500; }
+.pov-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid; font-family: var(--font-sans); }
+.pov-detective { background: var(--accent-detective-bg); color: var(--accent-detective); border-color: rgba(55,138,221,0.3); }
+.pov-criminal { background: var(--accent-criminal-bg); color: var(--accent-criminal); border-color: rgba(226,75,74,0.3); }
+.progress-wrap { background: var(--border); border-radius: 20px; height: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+.progress-bar { height: 2px; border-radius: 20px; background: var(--text-muted); transition: width 0.5s ease; }
+.scene-card { border-radius: 12px; padding: 1.75rem; margin-bottom: 1.25rem; border: 0.5px solid var(--border); }
+.scene-card.detective { background: var(--surface); }
+.scene-card.criminal { background: var(--surface); border-color: rgba(226,75,74,0.2); }
+.chapter-label { font-size: 11px; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.1em; font-family: var(--font-sans); }
+.scene-text { font-size: 15px; color: var(--text); line-height: 2; white-space: pre-wrap; }
+.psych-label { font-size: 12px; color: var(--text-muted); margin: 1.25rem 0 8px; font-family: var(--font-sans); letter-spacing: 0.05em; }
+.choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+.choice-btn { text-align: left; padding: 12px 14px; cursor: pointer; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; font-family: var(--font-sans); line-height: 1.6; transition: border-color 0.15s, background 0.15s; }
+.choice-btn:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface); }
+.choice-btn.selected-detective { border-color: var(--accent-detective); background: var(--accent-detective-bg); color: var(--accent-detective); }
+.choice-btn.selected-criminal { border-color: var(--accent-criminal); background: var(--accent-criminal-bg); color: var(--accent-criminal); }
+.choice-btn.dimmed { opacity: 0.3; }
+.psych-tag { font-size: 11px; display: inline-block; padding: 2px 8px; border-radius: 20px; margin-left: 6px; background: transparent; color: var(--text-muted); border: 0.5px solid var(--border); }
+.result-box { border-radius: var(--radius); padding: 12px 14px; margin-bottom: 1rem; font-size: 13px; color: var(--text-sub); line-height: 1.7; border-left: 2px solid var(--border-strong); background: var(--surface2); font-family: var(--font-sans); }
+.result-box.correct { border-left-color: var(--accent-correct); }
+.result-box.wrong { border-left-color: var(--accent-criminal); }
+.hidden { display: none; }
+.next-btn { font-size: 13px; font-family: var(--font-sans); padding: 8px 24px; cursor: pointer; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: transparent; color: var(--text); transition: background 0.15s; }
+.next-btn:hover { background: rgba(255,255,255,0.06); }
+.end-screen { text-align: center; padding: 4rem 0; }
+.end-title { font-size: 36px; font-weight: 400; color: var(--text); margin-bottom: 8px; letter-spacing: 0.2em; }
+.end-score { font-size: 64px; font-weight: 400; color: var(--text); margin: 1rem 0; font-family: var(--font-sans); }
+.end-sub { font-size: 14px; color: var(--text-sub); line-height: 2; margin-bottom: 2.5rem; white-space: pre-wrap; }
+.restart-btn { font-size: 13px; font-family: var(--font-sans); padding: 8px 24px; cursor: pointer; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: transparent; color: var(--text); }
+.restart-btn:hover { background: rgba(255,255,255,0.06); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="title-screen" class="title-screen">
+    <div class="game-title">無意味</div>
+    <div class="game-sub">心理ミステリー — 全8章</div>
+    <button class="start-btn" onclick="startGame()">はじめる</button>
+  </div>
+  <div id="game-screen" class="hidden">
+    <div class="score-row">
+      <div class="score-pill">第 <span id="chapter-num">1</span> 章 / 8</div>
+      <div class="score-pill">読み <span id="score-num">0</span>pt</div>
+      <div class="pov-pill pov-detective" id="pov-pill">探偵視点</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:12%"></div></div>
+    <div class="scene-card detective" id="scene-card">
+      <div class="chapter-label" id="chapter-label"></div>
+      <div class="scene-text" id="scene-text"></div>
+    </div>
+    <div class="psych-label" id="psych-label"></div>
+    <div class="choices" id="choices"></div>
+    <div id="result-box" class="result-box hidden"></div>
+    <button id="next-btn" class="next-btn hidden" onclick="nextScene()">次へ</button>
+  </div>
+  <div id="end-screen" class="end-screen hidden">
+    <div class="end-title">無意味</div>
+    <div class="end-score" id="end-score">0pt</div>
+    <div class="end-sub" id="end-sub"></div>
+    <button class="restart-btn" onclick="restartGame()">もう一度</button>
+  </div>
+</div>
+<script>
+const scenes=[{chapter:'第一章 — 探偵視点',pov:'detective',povLabel:'探偵視点',text:'死。\n\nまた、誰かが死んだ。\n\n被害者の部屋。窓際に椅子が一脚。テーブルに飲みかけのコーヒー。\n\n隣室の住人がドアを半開きにして覗いている。目が赤い。泣いているのか、それとも——',psych:'この場の空気を読め — 探偵としてどう動く？',choices:[{text:'「見ていいですか」と声をかけ、部屋に入る',psych:'支配・主導権',correct:false,feedback:'住人は身を固くした。圧力は沈黙を生む。証人の心が閉じた。'},{text:'何も言わず、住人の視線の先を静かに追う',psych:'観察・共鳴',correct:true,feedback:'正解。人は見ている方向に真実を持っている。住人は自分から話し始めた。'},{text:'「いつから知り合いでしたか」と質問する',psych:'情報収集',correct:false,feedback:'早すぎた。信頼が生まれる前の質問は壁を作る。'}]},{chapter:'第二章 — 探偵視点',pov:'detective',povLabel:'探偵視点',text:'容疑者は三人。\n\n一人目は泣いている。\n二人目は怒っている。\n三人目は——何も言わない。\n\n探偵は椅子に座り、長い沈黙を作った。\n\nどこを見るか。',psych:'この場の空気を読め',choices:[{text:'泣いている人を見る',psych:'感情・表出',correct:false,feedback:'泣くことは見せることだ。本当に動揺している人間は、泣くことに気づかない。'},{text:'怒っている人を見る',psych:'防衛・攻撃',correct:false,feedback:'怒りは恐怖の仮面だ。だがこの怒りは——探偵の視線を引き付けようとしているかもしれない。'},{text:'何も言わない人を見る',psych:'抑制・隠蔽',correct:true,feedback:'正解。沈黙は最も重い言葉だ。何も言わない人間は、言わないことを選んでいる。そこに意志がある。'}]},{chapter:'第三章 — 探偵視点',pov:'detective',povLabel:'探偵視点',text:'被害者の日記が見つかった。\n\n最後のページにこう書いてある。\n\n「今日、誰かに見られていた気がした。\n気のせいかもしれない。\nでも——なぜか怖くなかった。」\n\n探偵はページを閉じた。',psych:'この日記の心理を読め',choices:[{text:'被害者は犯人を知っていた',psych:'親密・信頼',correct:true,feedback:'正解。知らない人間に見られて怖くないのはおかしい。被害者は犯人に安心感を覚えていた。それが罠だった。'},{text:'被害者は自分の死を予感していた',psych:'予感・受容',correct:false,feedback:'詩的だが、根拠が薄い。感情の解釈は証拠にならない。'},{text:'被害者はもともと恐怖を感じにくい人間だった',psych:'性格・特性',correct:false,feedback:'可能性はあるが、「なぜか」という言葉が引っかかる。意外性を示している。'}]},{chapter:'第四章 — 探偵視点',pov:'detective',povLabel:'探偵視点',text:'聞き込み。\n\n近所の老人がこう言った。\n\n「あの日、雨が降っていてね。\nでも——傘を持たずに出て行く人を見たよ。\n急いでいるのか、忘れたのか。\nまあ、若い人はよくそういうことするね。」\n\n老人は笑った。\n探偵は笑わなかった。',psych:'この証言の何が重要か',choices:[{text:'雨の日に傘を持たない——急いでいた証拠だ',psych:'行動・状況',correct:false,feedback:'急いでいた可能性はある。しかし「忘れた」という解釈も老人は提示している。'},{text:'老人が「若い人」と言った——年齢が手がかりだ',psych:'観察・証言',correct:true,feedback:'正解。老人の何気ない一言に年齢の手がかりが隠れていた。証言は事実だけでなく、語り手の観察を含む。'},{text:'老人の証言は信頼できない——記憶が曖昧だ',psych:'懐疑・検証',correct:false,feedback:'細部を覚えているということは、その瞬間に注目していたということだ。'}]},{chapter:'第五章 — 探偵視点',pov:'detective',povLabel:'探偵視点',text:'証拠が揃ってきた。\n\n犯人はほぼ特定できた。\n\nだが——探偵は動かなかった。\n\nまた、誰かが死んだとしても。\n犯人を捕まえたとしても。\n世界は変わるのだろうか。\n\n窓の外に、街が見える。\n何も変わっていない。',psych:'探偵の内面を読め — 次の行動は？',choices:[{text:'感情を切り離し、仕事として捜査を進める',psych:'切離・義務',correct:false,feedback:'正しい選択だ。しかし何かが欠けている。義務だけで動く人間は、いつか止まる。'},{text:'しばらく窓の外を見て、また歩き始める',psych:'虚無・継続',correct:true,feedback:'正解。意味がないとわかっていても、また動く。それが探偵の真実だ。'},{text:'上司に捜査の終了を申し出る',psych:'撤退・限界',correct:false,feedback:'人間らしい選択だ。しかしこの探偵は——やめ方を知らない。'}]},{chapter:'第六章 — 犯人視点',pov:'criminal',povLabel:'犯人視点',text:'探偵が来た。\n\nドアを開けた瞬間、私はわかった。\nこの人間は——何も見えていない。\n\n賢そうな目をしている。\n質問も的確だ。\nだが——私の計画に、穴はない。\n\n「先日、被害者とはどんな関係でしたか？」\n\n私は微笑んだ。',psych:'犯人として——何を答えるか？',choices:[{text:'「普通の知人です。特に親しくはありませんでした」と答える',psych:'距離・否定',correct:false,feedback:'距離を置きすぎた。探偵は「普通」という言葉に引っかかりを感じた。'},{text:'「とても良い人でした」と少し間を置いてから答える',psych:'演技・共感',correct:true,feedback:'正解。間が自然な悲しみに見えた。探偵は何も掴めなかった。完璧な演技は、感情に見える。'},{text:'「なぜそんなことを聞くんですか」と逆に質問する',psych:'攻撃・防衛',correct:false,feedback:'警戒心が出た。探偵の目が細くなった。'}]},{chapter:'第七章 — 犯人視点',pov:'criminal',povLabel:'犯人視点',text:'探偵が帰った後。\n\n私は窓の外を見た。\n\n計画は完璧だ。\n証拠はない。\nアリバイもある。\n\nなのに——\n\nあの探偵の目が、頭から離れない。\n\n何も見えていないはずなのに。\nなぜ、あの目が気になるのか。',psych:'犯人の心理を読め — この違和感の正体は？',choices:[{text:'探偵が実は何かを掴んでいる',psych:'危機・警戒',correct:false,feedback:'被害妄想だ。証拠はない。この思考は判断を曇らせる。'},{text:'完璧すぎる計画が、逆に不安を生んでいる',psych:'完璧主義・不安',correct:false,feedback:'心理的には正しい。しかしこの違和感の本質はもっと深いところにある。'},{text:'初めて、自分を「見た」人間に出会った気がする',psych:'孤独・認識',correct:true,feedback:'正解。犯人は誰にも本当の自分を見せたことがなかった。探偵の目が——初めて自分の存在を認識した気がした。'}]},{chapter:'第八章 — 交差',pov:'detective',povLabel:'探偵 × 犯人',text:'犯人と、二人きりになった。\n\n全ての証拠が揃った。\n\n犯人はこう言った。\n\n「あなたは正しい。私がやりました。\nでも——それを知って、世界は変わりましたか?\n\n明日もまた、誰かが死ぬ。\nあなたはまた、来る。\n私のような人間は、消えない。\n\nそれでも——続けますか？」\n\n長い沈黙。\n窓の外に、街が見える。\n何も変わっていない。',psych:'最後の問いに答えよ',choices:[{text:'「正義のために戦い続ける」と答える',psych:'使命・信念',correct:false,feedback:'言葉は空虚に響いた。犯人は微笑んだ。探偵自身も——信じていなかった。'},{text:'何も答えない。ただ、窓の外を見る',psych:'虚無・誠実',correct:true,feedback:'正解。沈黙こそが最も誠実な答えだった。世界は変わらない。それでも——探偵はまた、明日も歩く。それだけが真実だ。'},{text:'「あなたを逮捕する。それが仕事だ」と答える',psych:'役割・義務',correct:false,feedback:'正しい。しかし——犯人の問いはまだ、宙に浮いたままだ。'}]}];
+
+let cur=0,score=0,answered=false;
+function startGame(){document.getElementById('title-screen').classList.add('hidden');document.getElementById('game-screen').classList.remove('hidden');render();}
+function render(){const s=scenes[cur];answered=false;document.getElementById('chapter-num').textContent=cur+1;document.getElementById('score-num').textContent=score;document.getElementById('chapter-label').textContent=s.chapter;document.getElementById('scene-text').textContent=s.text;document.getElementById('psych-label').textContent=s.psych;document.getElementById('progress-bar').style.width=((cur+1)/scenes.length*100)+'%';const pp=document.getElementById('pov-pill');pp.textContent=s.povLabel;pp.className='pov-pill pov-'+s.pov;document.getElementById('scene-card').className='scene-card '+s.pov;document.getElementById('result-box').classList.add('hidden');document.getElementById('next-btn').classList.add('hidden');document.getElementById('choices').innerHTML=s.choices.map((c,i)=>`<button class="choice-btn" onclick="choose(${i})">${c.text}<span class="psych-tag">${c.psych}</span></button>`).join('');}
+function choose(i){if(answered)return;answered=true;const s=scenes[cur];const c=s.choices[i];const btns=document.querySelectorAll('.choice-btn');btns[i].classList.add(c.correct?(s.pov==='criminal'?'selected-criminal':'selected-detective'):'dimmed');btns.forEach((b,j)=>{if(j!==i)b.classList.add('dimmed');b.disabled=true;});if(c.correct)score+=30;const r=document.getElementById('result-box');r.className='result-box '+(c.correct?'correct':'wrong');r.textContent=(c.correct?'◎ ':'× ')+c.feedback;r.classList.remove('hidden');document.getElementById('score-num').textContent=score;const nb=document.getElementById('next-btn');nb.textContent=cur<scenes.length-1?'次へ':'結末へ';nb.classList.remove('hidden');}
+function nextScene(){cur++;if(cur>=scenes.length)showEnd();else render();}
+function showEnd(){document.getElementById('game-screen').classList.add('hidden');document.getElementById('end-screen').classList.remove('hidden');document.getElementById('end-score').textContent=score+'pt';const max=scenes.length*30;let msg='';if(score===max){msg='完璧な読み。\nあなたは人間を完全に理解した。\n\n探偵も、犯人も。\n\nそれでも——世界は変わらなかった。\nそれが「無意味」の意味だ。';}else if(score>=max*0.6){msg='半分の真実。\n人間は半分しか読めない。\n\nだから——また明日も歩く。\nそれだけが残る。';}else{msg='空気は読めなかった。\n\nでも——読めないことが、人間らしさかもしれない。\n探偵はまた、次の死体の元へ向かう。\n犯人はまた、次の計画を立てる。\n\n無意味は、続く。';}document.getElementById('end-sub').textContent=msg;}
+function restartGame(){cur=0;score=0;document.getElementById('end-screen').classList.add('hidden');document.getElementById('game-screen').classList.remove('hidden');render();}
+</script>
+</body>
+</html>
